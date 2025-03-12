@@ -6,14 +6,18 @@ import pickle
 from reconnect_stat import Reconnect_Stat
 from reconnect_stat import find_reconnection
 from render_results import plot_graphs
+
+from log_filter import input_config_file
 from log_utils import *
 
 
 def process_logs() -> List[Reconnect_Stat]:
-    config = toml.load("config.toml")
-    filtered_log = config['files']['output_file']
+    config = toml.load(input_config_file)
+    input_file = config['files']['input_file']
+    filtered_dir = config['files']['output_dir']
+    filtered_log_file_name = filtered_dir + "\\" + get_filter_log_name(input_file)
     Reconnect_Stat.RoamingOptions = config['options']
-    reconn_objs = find_reconnection(filtered_log)
+    reconn_objs = find_reconnection(filtered_log_file_name)
     return reconn_objs
 
 

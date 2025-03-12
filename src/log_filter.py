@@ -4,8 +4,11 @@ Created on Tue Feb 25 17:12:49 2025
 
 @author: d.sysoev
 """
-
 import toml
+from log_utils import get_filter_log_name
+
+input_config_file = "config_moscow_11_03_25.toml"
+
 def filter_beltpack_log(log_file_name_path: str, out_file_name: str) -> None:
 
     with open(log_file_name_path) as inp_file:
@@ -29,7 +32,8 @@ def filter_beltpack_log(log_file_name_path: str, out_file_name: str) -> None:
                 num_line += 1
 
 if __name__ == "__main__":
-    config = toml.load(r"config.toml")
+    config = toml.load(input_config_file)
     input_file = config['files']['input_file']
-    output_file = config['files']['output_file']
-    filter_beltpack_log(input_file, output_file)
+    output_dir = config['files']['output_dir']
+    output_file = output_dir + "\\" + get_filter_log_name(input_file)
+    filter_beltpack_log(input_file, output_file )

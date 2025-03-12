@@ -2,6 +2,26 @@ from typing import Optional
 from typing import Tuple
 from typing import List
 
+import os
+
+def get_filter_log_name(log_name: str) -> str:
+    """
+    Получить имя отфильтрованного лога из имени входного файла
+    Parameters
+    ----------
+    log_name : str
+        Полный путь до файла с логами
+    Returns
+    -------
+    str
+        Имя лога с фильтрованными значениями
+    """
+    log_name = os.path.basename(log_name).split(".")
+    return log_name[0] + "_filter." + log_name[1]
+
+
+
+
 def get_tm_label(log_msg: str) -> int:
     """
     Получить временную метку события в логе

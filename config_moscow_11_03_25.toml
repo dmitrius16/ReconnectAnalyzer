@@ -1,7 +1,7 @@
 [files]
-input_file = '..\Moscow_17.02.2025\beltpack_roaming_izm_1.log'
-output_dir = '..\result'
-recon_dir  = '..\result'
+input_file = '..\Moscow_11.03.2025\ENG_roaming.log'
+output_dir = '..\result_moscow_11_03_25'
+recon_dir  = '..\result_moscow_11_03_25'
 
 [options]
 Option_0 = 90
@@ -12,15 +12,15 @@ Option_4 = 5
 Option_5 = 5
 Option_6 = 5
 Option_7 = 5
-Option_8 = 150
-Option_9 = 150
-Option_10 = 150
+Option_8 = 12
+Option_9 = 12
+Option_10 = 12
 Option_11 = 15
 Option_12 = 9
-Option_13 = 163
+Option_13 = 18
 Option_14 = 2
 Option_15 = 10
 Option_16 = 5
-Option_17 = 150
+Option_17 = 12
 Option_18 = 172
 Option_19 = 60
