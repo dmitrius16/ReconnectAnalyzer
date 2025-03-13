@@ -109,7 +109,7 @@ class Reconnect_Stat():
                     else:
                         cnt_trig_thr[key] = 0
 
-        # ищем ключ у которого максимальное значение ошибок, на случай если не удасться определить по срабатыванию порогов
+        # ищем ключ у которого максимальное значение ошибок, на случай если не получится определить по срабатыванию порогов
         max_err_key_name = ""
         max_err_val = 0
         thr_keys = []
@@ -168,6 +168,7 @@ class Reconnect_Stat():
             print(f"Parallel search reason {self.secondary_search_reason}")
         elif self.force_disc_reason:
             print(f"Force disconnect reason {self.force_disc_reason}")
+        print(f"Connected to BS: {get_name_bs_from_rfpi(self.connect_rfpi)} rfpi: {self.connect_rfpi}")
         print("------------------------------")
 
 
@@ -206,7 +207,7 @@ def find_reconnection(file_name: str) -> List[Reconnect_Stat]:
                 reccon_stat.end_tm = get_tm_label(log_strings[tm_labels[1]][1])
 
                 # Здесь пытаемся определить к какой RFPI мы соединились
-
+                reccon_stat.connect_rfpi = define_connected_RFPI(log_strings, tm_labels[1])
 
                 st_ind = tm_labels[1]
             else:

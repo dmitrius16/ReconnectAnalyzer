@@ -5,7 +5,7 @@ Created on Tue Feb 25 17:12:49 2025
 @author: d.sysoev
 """
 import toml
-from log_utils import get_filter_log_name
+from log_utils import *
 
 input_config_file = "config_moscow_11_03_25.toml"
 
@@ -19,10 +19,11 @@ def filter_beltpack_log(log_file_name_path: str, out_file_name: str) -> None:
         for entry in beltpack_log:
             filter = [entry.rfind("tm:") != -1]
             filter.append(entry.rfind("tm=") != -1)
-            filter.append(entry.find("~~~~~~~~~~~~~   CONNECTION LOST") != -1)
-            filter.append(entry.find("~~~~~~~~~~ SOUND CONNECT") != -1)
-            filter.append(entry.find("~~~~~~~~~~~~~   CONNECTION ESTABLISHED") != -1)
-            filter.append(entry.find("~~~~~~~~~~~ Output every 5 sec") != -1)
+            filter.append(entry.find(connection_lost_str) != -1)
+            filter.append(entry.find(sound_connect_establish_str) != -1)
+            filter.append(entry.find(connection_establish_str) != -1)
+            filter.append(entry.find(output_every_5_sec_str) != -1)
+            filter.append(entry.find(s_cc_setup_str) != -1)
             filter.append(entry.find("Option ") != -1)
 
             if any(filter): # tm: - timelabels, tm= - strings when try to find BS

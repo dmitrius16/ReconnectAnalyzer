@@ -1,8 +1,36 @@
 from typing import Optional
 from typing import Tuple
 from typing import List
-
+from typing import Dict
+from typing import Any
 import os
+
+
+connection_establish_str = "~~~~~~~~~~~~~   CONNECTION ESTABLISHED"
+sound_connect_establish_str = "~~~~~~~~~~ SOUND CONNECT ESTABLISHED"
+connection_lost_str = "~~~~~~~~~~~~~   CONNECTION LOST"
+output_every_5_sec_str = "~~~~~~~~~~~ Output every 5 sec"
+selected_rfpi_str = "> F:FP selected: RFPI"
+s_cc_setup_str = "> S:-> {CC-SETUP}"
+
+bs_name_to_rfpi = {}
+rfpi_to_bs_name = {}
+
+
+def parse_bs_config(config: Dict[str, Any]) -> None:
+    for bs in config["BaseStation"]:
+        bs_name = bs["name"]
+        bs_rfpis = bs["RFPI"]
+        bs_name_to_rfpi[bs_name] = bs_rfpis
+        for rfpi in bs_rfpis:
+            rfpi_to_bs_name[rfpi] = bs_name
+
+
+def get_name_bs_from_rfpi(rfpi_bs: str):
+    if rfpi_bs in rfpi_to_bs_name:
+        return rfpi_to_bs_name[rfpi_bs]
+    return "undefined"
+
 
 def get_filter_log_name(log_name: str) -> str:
     """
@@ -18,8 +46,6 @@ def get_filter_log_name(log_name: str) -> str:
     """
     log_name = os.path.basename(log_name).split(".")
     return log_name[0] + "_filter." + log_name[1]
-
-
 
 
 def get_tm_label(log_msg: str) -> int:
@@ -62,7 +88,7 @@ def find_reconnect_event(log_strings: List[Tuple[int, str]],
     """
     tm_lost_connect = None
     for num, msg in log_strings[st_ind:]:
-        if msg.find("~~~~~~~~~~~~~   CONNECTION LOST") != -1:
+        if msg.find(connection_lost_str) != -1:
             tm_lost_connect = num
             break
 
@@ -109,18 +135,59 @@ def get_list_records_before_disconnect(log_strings: List[Tuple[int, str]], disco
             tm_label = get_tm_label(log_strings[log_ind][1])
             if (lost_conn_tm_label - tm_label) >= time_back:
                 break
-            if "~~~~~~~~~~~~~   CONNECTION ESTABLISHED" in log_strings[log_ind][1]:
-               break
-            if "~~~~~~~~~~ SOUND CONNECT ESTABLISHED" in log_strings[log_ind][1]:
+            if connection_establish_str in log_strings[log_ind][1]:
+                break
+            if sound_connect_establish_str in log_strings[log_ind][1]:
                 break
     return result
 
 
-def define_connected_RFPI(log_strings: List[Tuple[int, str]], conn_ind: int, time_back: int) -> str:
+def get_rfpi_from_selected_rfpi_str(rfpi_str: str) -> str:
+    rfpi_text = "RFPI = "
+    ind_rfpi = rfpi_str.find(rfpi_text)
+    if ind_rfpi != -1:
+        ind_rfpi += len(rfpi_text)
+        rfpi_str = rfpi_str[ind_rfpi:].split(";")[0]
+        rfpi_str = rfpi_str.lower().replace(" ", "")
+        return rfpi_str
+    return ""
+
+
+def get_rfpi_from_s_cc_setup_str(cc_setup: str) -> str:
+    rfpi_str = cc_setup.split("(")[1]
+    rfpi_str = rfpi_str.split(" ")
+    rfpi_str = "".join(rfpi_str[15:20]).lower()
+    return rfpi_str
+
+
+def define_connected_RFPI(log_strings: List[Tuple[int, str]], conn_ind: int) -> str:
     """
-    Определить к какой БС приконнектились
+    Получить rfpi станции к которой удалось приконнектится
     Parameters
     ----------
-    log_strings 
+    log_strings : List[Tuple[int, str]]
+        Пронумерованный лог с белтпака, список содержащий кортежи (номер строки, сама строка)
+    conn_ind : int
+        индекс события установления связи
+    time_back : int
+        на сколько секунд отмотать назад от события разрыва для захвата строк с качеством
+
+    Returns
+    -------
+    List[str]
+        DESCRIPTION.
     """
-    pass
+    result = "undefined"
+    log_ind = conn_ind
+    while log_ind > 0:
+        log_ind -= 1
+        if log_strings[log_ind][1].find(selected_rfpi_str) != -1:
+            result = get_rfpi_from_selected_rfpi_str(log_strings[log_ind][1])
+            return result
+        elif log_strings[log_ind][1].find(s_cc_setup_str) != -1:
+            result = get_rfpi_from_s_cc_setup_str(log_strings[log_ind][1])
+            return result
+        if log_strings[log_ind][1].find(connection_lost_str) != -1:
+            break
+    return result
+

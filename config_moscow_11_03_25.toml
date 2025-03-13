@@ -3,6 +3,35 @@ input_file = '..\Moscow_11.03.2025\ENG_roaming.log'
 output_dir = '..\result_moscow_11_03_25'
 recon_dir  = '..\result_moscow_11_03_25'
 
+[[BaseStation]]
+name = "633.ICIO.201"
+RFPI = [
+    "03879ba238",
+    "03879ba200"
+]
+
+[[BaseStation]]
+name = "633.ICIO.202"
+RFPI = [
+    "03879ee758",
+    "03879ba018"
+]
+
+[[BaseStation]]
+name = "633.ICIO.203"
+RFPI = [
+    "03879ee750",
+    "03879022b8"
+]
+
+[[BaseStation]]
+name = "600.ICIO.203"
+RFPI = [
+    "03879ba508",
+    "03879ba228"
+]
+
+
 [options]
 Option_0 = 90
 Option_1 = 90
@@ -24,3 +53,4 @@ Option_16 = 5
 Option_17 = 12
 Option_18 = 172
 Option_19 = 60
+
