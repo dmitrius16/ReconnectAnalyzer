@@ -5,7 +5,6 @@ from typing import Dict
 from typing import Any
 import os
 
-
 connection_establish_str = "~~~~~~~~~~~~~   CONNECTION ESTABLISHED"
 sound_connect_establish_str = "~~~~~~~~~~ SOUND CONNECT ESTABLISHED"
 connection_lost_str = "~~~~~~~~~~~~~   CONNECTION LOST"
@@ -143,6 +142,17 @@ def get_list_records_before_disconnect(log_strings: List[Tuple[int, str]], disco
 
 
 def get_rfpi_from_selected_rfpi_str(rfpi_str: str) -> str:
+    """
+    Получить RFPI выбранной станции из строки "FP selected: RFPI ="
+    Parameters
+    ----------
+    rfpi_str: str
+        Соответствующая строка из лога
+    Returns
+    ----------
+    str
+        Строка содержащая только rfpi
+    """
     rfpi_text = "RFPI = "
     ind_rfpi = rfpi_str.find(rfpi_text)
     if ind_rfpi != -1:
@@ -153,7 +163,43 @@ def get_rfpi_from_selected_rfpi_str(rfpi_str: str) -> str:
     return ""
 
 
+def get_rfpi_rssi_tm_from_selected_rfpi_str(rfpi_str: str) -> Optional[Tuple[str, int, int]]:
+    """
+    Получить значения RFPI, rssi и временной метки из строки "FP selected: RFPI = "
+    Parameters
+    ----------
+    rfpi_str: str
+        Соответствующая строка из лога
+    Returns
+    ----------
+    Tuple[str, int, int]
+        Кортеж, содержащий значение строковое значение rfpi, значение rssi БС и значение временной метки
+    """
+    rfpi_str = rfpi_str.split(";")
+    rfpi_text = "RFPI = "
+    ind_rfpi = rfpi_str[0].find(rfpi_text)
+    if ind_rfpi != -1:
+        ind_rfpi += len(rfpi_text)
+        rfpi = rfpi_str[0][ind_rfpi:].lower().replace(" ", "")
+        rssi_tmstmp = rfpi_str[1].strip().split(" ")
+        rssi = int(rssi_tmstmp[2])
+        tm_stmp = int(rssi_tmstmp[-1])
+        return rfpi, rssi, tm_stmp
+    return None
+
+
 def get_rfpi_from_s_cc_setup_str(cc_setup: str) -> str:
+    """
+    Получить RFPI из строки "S:-> {CC-SETUP}"
+    Parameters
+    ----------
+    cc_setup: str
+        Соответствующая строка из лога
+    Returns
+    ----------
+    str
+        Строка содержащая только rfpi
+    """
     rfpi_str = cc_setup.split("(")[1]
     rfpi_str = rfpi_str.split(" ")
     rfpi_str = "".join(rfpi_str[15:20]).lower()
@@ -191,3 +237,21 @@ def define_connected_RFPI(log_strings: List[Tuple[int, str]], conn_ind: int) -> 
             break
     return result
 
+
+def find_sync_complete_tm_stmp_info(filter_log: List[str], i_sel_rfpi: int) -> int:
+    """
+    Найти временную метку окончания синхронизации с базовой станцией.
+    Details: После того как выбрали БС(Selected RFPI), происходит попытка синхронизации
+    с БС
+    Parameters
+    ----------
+    filter_log: List[str]
+        Список с отфильтрованными строками лога
+    i_sel_rfpi: int
+        Индекс строки "FP selected: RFPI = " в логе
+
+    Returns
+    ---------
+    int
+        Временная метка с завершением синхронизации
+    """

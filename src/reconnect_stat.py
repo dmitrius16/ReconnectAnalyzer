@@ -5,6 +5,7 @@ Created on Fri Feb 28 11:13:12 2025
 @author: d.sysoev
 """
 from typing import List
+from typing import Tuple
 from log_utils import *
 
 '''
@@ -14,6 +15,21 @@ except ImportError:
     from src.log_utils import *
 '''
 
+
+class BSInfo:
+    def __init__(self):
+        self._rfpi = ""
+        self._name_bs = ""
+        self._level_rssi = 0
+
+
+class BSSearchingStat:
+    def __init__(self):
+        self.bs_info = BSInfo()
+        self.tm_label_sel_rfpi = 0
+        self.tm_label_end = 0
+        self.conn_result = ""
+
 class Reconnect_Stat():
     """
     reconnect_stat - class that contains statistics about recconection
@@ -22,6 +38,14 @@ class Reconnect_Stat():
     DisconnReason_ConnRejByBeltpack = "Connection rejected by Beltpack"
     DisconnReason_FindBSWith2Ch = "Sync completed with 2'nd ch"
     DisconnReason_Undefined = "Undefined disconnect reason"
+
+    """
+    Search BS strings
+    """
+    SelectedRFPI = "> F:FP selected: RFPI"
+    ConnRejByBS = "> F:Conn rej by BS"
+    NoAccessToBS = "> F:No access to this BS"
+    FP_find = "> F:FP find"
 
     '''
     Quality keys
@@ -43,12 +67,12 @@ class Reconnect_Stat():
 
     QualityErr = [NumberOf_BeltpackNoSync, NumberOf_ZError, NumberOf_XCRCError, NumberOf_ACRCError, NumberOf_BSNoSync]
 
-    QKeysToOptParSearch = {Average_RSSI : "Option_3", NumberOf_BeltpackNoSync : "Option_4",
-                           NumberOf_ACRCError : "Option_5", NumberOf_XCRCError: "Option_6",
+    QKeysToOptParSearch = {Average_RSSI: "Option_3", NumberOf_BeltpackNoSync: "Option_4",
+                           NumberOf_ACRCError: "Option_5", NumberOf_XCRCError: "Option_6",
                            NumberOf_ZError: "Option_7", NumberOf_BSNoSync: "Option_16"}  # отображение ошибок на опции которые задают пороги
 
-    QKeyToOptForceDisc = {NumberOf_BeltpackNoSync : "Option_8", NumberOf_ACRCError : "Option_9",
-                          NumberOf_XCRCError : "Option_10", NumberOf_BSNoSync : "Option_17"}
+    QKeyToOptForceDisc = {NumberOf_BeltpackNoSync: "Option_8", NumberOf_ACRCError: "Option_9",
+                          NumberOf_XCRCError: "Option_10", NumberOf_BSNoSync: "Option_17"}
 
     OptLessOrEq = lambda x, y: x <= y
     OptMoreOrEq = lambda x, y: x >= y
@@ -67,6 +91,7 @@ class Reconnect_Stat():
         self.secondary_search_reason = []
         self.force_disc_reason = []
         self.qualities_before_disconn = {}
+        self.bs_search_info = []
         # self.connected_RFPI возможно зафиксированть RFPI и rssi станции к которой получили коннект коннект
         # РЭО за десять секунд до реконнекта
 
@@ -86,7 +111,7 @@ class Reconnect_Stat():
     def define_reason_for_disconnect(self, log_before_disconn):
         for log_str in log_before_disconn[::-1]:
             if log_str.find("> F:No FP found") != -1:
-                self.disconn_reason = Reconnect_Stat.DisconnReason_ConnRejByBS
+                self.disconn_reason = Reconnect_Stat.DisconnReason_ConnRejByBS # как то сомнительный признак
                 return
             elif log_str.find("> F:Conn. close by thr.") != -1:
                 self.disconn_reason = Reconnect_Stat.DisconnReason_ConnRejByBeltpack
@@ -109,7 +134,7 @@ class Reconnect_Stat():
                     else:
                         cnt_trig_thr[key] = 0
 
-        # ищем ключ у которого максимальное значение ошибок, на случай если не получится определить по срабатыванию порогов
+        # ищем ключ у которого максимальное значение ошибок, на случай если не удасться определить по срабатыванию порогов
         max_err_key_name = ""
         max_err_val = 0
         thr_keys = []
@@ -159,6 +184,47 @@ class Reconnect_Stat():
                 else:
                     self.secondary_search_reason = res
 
+    def get_bs_search_stat(self, filter_logs: List[str], tm_labels: Tuple[int, int]):
+        log_ind = tm_labels[0]
+        i_snd_est = tm_labels[1] if tm_labels[1] is not None else len(filter_logs)
+
+        res = []
+        # Вынести в отдельнцю функцию
+        if self.disconn_reason == Reconnect_Stat.DisconnReason_FindBSWith2Ch:
+            # ищем строчку selected RFPI до потери коннекта
+            while log_ind > 0:
+                log_ind -= 1
+                if Reconnect_Stat.SelectedRFPI in filter_logs[log_ind]:
+                    sel_bs_info = get_rfpi_rssi_tm_from_selected_rfpi_str(filter_logs[log_ind])
+                    if sel_bs_info is not None:
+                        res.append(create_bs_search_info(sel_bs_info))
+                    break
+
+        # Вынести в отдельнцю функцию
+        elif self.disconn_reason == Reconnect_Stat.DisconnReason_ConnRejByBeltpack or\
+            self.disconn_reason == Reconnect_Stat.DisconnReason_ConnRejByBS:
+            # ищем строку selected RFPI после потери коннекта
+            while log_ind < i_snd_est:
+                log_ind += 1
+                if Reconnect_Stat.SelectedRFPI in filter_logs[log_ind]:
+                    sel_bs_info = get_rfpi_rssi_tm_from_selected_rfpi_str(filter_logs[log_ind])
+                    if sel_bs_info is not None:
+                        res.append(create_bs_search_info(sel_bs_info))
+                    break
+
+        # ищем информацию о том когда закончился sync complete записываем временную метку
+        log_ind += 1
+        log_ind = fill_bs_search_info(res[-1], filter_logs, log_ind, i_snd_est)
+
+        while log_ind < i_snd_est:
+            if Reconnect_Stat.SelectedRFPI in filter_logs[log_ind]:
+                sel_bs_info = get_rfpi_rssi_tm_from_selected_rfpi_str(filter_logs[log_ind])
+                res.append(create_bs_search_info(sel_bs_info))
+                log_ind = fill_bs_search_info(res[-1], filter_logs, log_ind, i_snd_est)
+            log_ind += 1
+        res[-1].conn_result = "connected"
+        res[-1].tm_label_end = i_snd_est
+        self.bs_search_info = res
 
     def output_reconnect_info(self, disconn_num: int):
         print(f"Disconnect number {disconn_num}")
@@ -201,8 +267,9 @@ def find_reconnection(file_name: str) -> List[Reconnect_Stat]:
             log_before_disconn = get_list_records_before_disconnect(log_strings, tm_labels[0], 10)  # берём 10 секунд от потери связи
             reccon_stat.parse_quality_logs(log_before_disconn)
             reccon_stat.define_reason_for_search_or_broke_link(log_before_disconn)
-            # Здесь надо добавить причины по которым случился рекконект
-            # Также надо добавить причины по которым есть параллельный запуск
+            # Ищем информацию о попытках подключения к станциям
+            reccon_stat.get_bs_search_stat(filter_logs, tm_labels)
+
             if tm_labels[1] is not None:
                 reccon_stat.end_tm = get_tm_label(log_strings[tm_labels[1]][1])
 
@@ -216,3 +283,34 @@ def find_reconnection(file_name: str) -> List[Reconnect_Stat]:
             break
     return result
 
+
+def create_bs_search_info(bs_info: Tuple[str, int, int]) -> BSSearchingStat:
+    obj = BSSearchingStat()
+    obj.bs_info._rfpi = bs_info[0]
+    obj.bs_info._name_bs = get_name_bs_from_rfpi(bs_info[0])
+    obj.bs_info._level_rssi = bs_info[1]
+    obj.tm_label_sel_rfpi = bs_info[2]
+    return obj
+
+
+def fill_bs_search_info(bs_search_stat: BSSearchingStat,
+                        filter_logs: List[str],
+                        cur_log_pos: int,
+                        end_log_pos: int) -> int:
+
+    while cur_log_pos < end_log_pos:
+        if Reconnect_Stat.ConnRejByBS in filter_logs[cur_log_pos]:
+            bs_search_stat.conn_result = Reconnect_Stat.ConnRejByBS
+            bs_search_stat.tm_label_end = get_tm_label(filter_logs[cur_log_pos])
+            break
+        elif Reconnect_Stat.NoAccessToBS in filter_logs[cur_log_pos]:
+            bs_search_stat.conn_result = Reconnect_Stat.NoAccessToBS
+            bs_search_stat.tm_label_end = get_tm_label(filter_logs[cur_log_pos])
+            break
+        elif Reconnect_Stat.FP_find in filter_logs[cur_log_pos] or\
+            Reconnect_Stat.SelectedRFPI in filter_logs[cur_log_pos]:
+            bs_search_stat.conn_result = "undefined"
+            bs_search_stat.tm_label_end = get_tm_label(filter_logs[cur_log_pos])
+            break
+        cur_log_pos += 1
+    return cur_log_pos

@@ -12,10 +12,10 @@ from typing import Dict
 from reconnect_stat import Reconnect_Stat
 
 import numpy as np
-
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
+from log_utils import *
 
 def get_quality_values(qualities: Dict,
                        time_stmps: List[int],
@@ -139,6 +139,23 @@ def plot_graphs(qualities_record: Dict) -> List[Figure]:
     figures = [plot_error_info(data_to_plot, err_name) for err_name in Reconnect_Stat.QualityErr]
     figures.insert(0, rssi_fig)
     return figures
+
+
+def create_reconnect_report(reconn_objs: List[Reconnect_Stat]) -> Dict:
+    result = []
+    for num, obj in enumerate(reconn_objs, start=1):
+        obj_dict = {}
+        obj_dict["Disconnect #"] = num
+        obj_dict["Time conn Lost"] = obj.start_tm
+        obj_dict["Time conn Estbl"] = obj.end_tm
+        obj_dict["Time no sound"] = obj.end_tm - obj.start_tm
+        obj_dict["Disconnect reason"] = obj.disconn_reason
+        obj_dict["Par search reason"] = obj.secondary_search_reason or "-----"
+        obj_dict["Force search reason"] = obj.force_disc_reason or "-----"
+        obj_dict["BS name"] = get_name_bs_from_rfpi(obj.connect_rfpi)
+        obj_dict["RFPI"] = obj.connect_rfpi
+        result.append(obj_dict)
+    return result
 
 
 def main():
