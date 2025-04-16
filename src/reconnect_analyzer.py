@@ -9,6 +9,7 @@ from reconnect_stat import Reconnect_Stat
 from reconnect_stat import find_reconnection
 from render_results import plot_graphs
 from render_results import create_reconnect_report
+from render_results import create_bs_search_report
 
 from log_filter import input_config_file
 from log_utils import *
@@ -35,6 +36,12 @@ if __name__ == "__main__":
     report_obj = create_reconnect_report(reconn_objs)
     df = pd.DataFrame(report_obj)
     print(df)
+
+    for num, recon_obj in enumerate(reconn_objs, start=1):
+        bs_search_report = create_bs_search_report(recon_obj)
+        df = pd.DataFrame(bs_search_report)
+        print(f"Disconnect #{num}")
+        print(df)
 
     for num, rec_obj in enumerate(reconn_objs, start=1):
         rec_obj.output_reconnect_info(num)

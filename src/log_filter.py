@@ -5,9 +5,10 @@ Created on Tue Feb 25 17:12:49 2025
 @author: d.sysoev
 """
 import toml
+import os
 from log_utils import *
 
-input_config_file = "config_moscow_11_03_25.toml"
+input_config_file = "night_beltpack.toml"
 
 def filter_beltpack_log(log_file_name_path: str, out_file_name: str) -> None:
 
@@ -36,5 +37,7 @@ if __name__ == "__main__":
     config = toml.load(input_config_file)
     input_file = config['files']['input_file']
     output_dir = config['files']['output_dir']
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     output_file = output_dir + "\\" + get_filter_log_name(input_file)
-    filter_beltpack_log(input_file, output_file )
+    filter_beltpack_log(input_file, output_file)

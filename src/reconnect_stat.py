@@ -18,9 +18,9 @@ except ImportError:
 
 class BSInfo:
     def __init__(self):
-        self._rfpi = ""
-        self._name_bs = ""
-        self._level_rssi = 0
+        self.rfpi = ""
+        self.name_bs = ""
+        self.level_rssi = 0
 
 
 class BSSearchingStat:
@@ -186,7 +186,7 @@ class Reconnect_Stat():
 
     def get_bs_search_stat(self, filter_logs: List[str], tm_labels: Tuple[int, int]):
         log_ind = tm_labels[0]
-        i_snd_est = tm_labels[1] if tm_labels[1] is not None else len(filter_logs)
+        i_snd_est = tm_labels[1] if tm_labels[1] is not None else (len(filter_logs) - 1)
 
         res = []
         # Вынести в отдельнцю функцию
@@ -220,10 +220,11 @@ class Reconnect_Stat():
             if Reconnect_Stat.SelectedRFPI in filter_logs[log_ind]:
                 sel_bs_info = get_rfpi_rssi_tm_from_selected_rfpi_str(filter_logs[log_ind])
                 res.append(create_bs_search_info(sel_bs_info))
+                log_ind += 1
                 log_ind = fill_bs_search_info(res[-1], filter_logs, log_ind, i_snd_est)
             log_ind += 1
         res[-1].conn_result = "connected"
-        res[-1].tm_label_end = i_snd_est
+        res[-1].tm_label_end = find_last_tm_label(filter_logs, i_snd_est) # здесь  нужно установить время коннекта либо последнее время лога
         self.bs_search_info = res
 
     def output_reconnect_info(self, disconn_num: int):
@@ -286,9 +287,9 @@ def find_reconnection(file_name: str) -> List[Reconnect_Stat]:
 
 def create_bs_search_info(bs_info: Tuple[str, int, int]) -> BSSearchingStat:
     obj = BSSearchingStat()
-    obj.bs_info._rfpi = bs_info[0]
-    obj.bs_info._name_bs = get_name_bs_from_rfpi(bs_info[0])
-    obj.bs_info._level_rssi = bs_info[1]
+    obj.bs_info.rfpi = bs_info[0]
+    obj.bs_info.name_bs = get_name_bs_from_rfpi(bs_info[0])
+    obj.bs_info.level_rssi = bs_info[1]
     obj.tm_label_sel_rfpi = bs_info[2]
     return obj
 
@@ -311,6 +312,15 @@ def fill_bs_search_info(bs_search_stat: BSSearchingStat,
             Reconnect_Stat.SelectedRFPI in filter_logs[cur_log_pos]:
             bs_search_stat.conn_result = "undefined"
             bs_search_stat.tm_label_end = get_tm_label(filter_logs[cur_log_pos])
-            break
+            return cur_log_pos  # здесь индекс не прибавляем чтобы вызывающая процедура не пропустила selected rfpi
         cur_log_pos += 1
     return cur_log_pos
+
+
+def find_last_tm_label(filter_logs: List[str], conn_ind: int) -> int:
+    while conn_ind > 0:
+        if filter_logs[conn_ind].find("tm:") != -1:
+            return get_tm_label(filter_logs[conn_ind])
+        conn_ind -= 1
+
+

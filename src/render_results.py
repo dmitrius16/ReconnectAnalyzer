@@ -158,6 +158,21 @@ def create_reconnect_report(reconn_objs: List[Reconnect_Stat]) -> Dict:
     return result
 
 
+def create_bs_search_report(reconn_obj: Reconnect_Stat) -> Dict:
+    result = []
+    for num, obj in enumerate(reconn_obj.bs_search_info):
+        bs_search_dict = {}
+        bs_search_dict["Name"] = obj.bs_info.name_bs
+        bs_search_dict["RFPI"] = obj.bs_info.rfpi
+        bs_search_dict["RSSI"] = obj.bs_info.level_rssi
+        bs_search_dict["State"] = obj.conn_result
+        bs_search_dict["tm st"] = obj.tm_label_sel_rfpi
+        bs_search_dict["tm end"] = obj.tm_label_end
+        bs_search_dict["Tm delta, ms"] = obj.tm_label_end - obj.tm_label_sel_rfpi
+        result.append(bs_search_dict)
+    return result
+
+
 def main():
     config = toml.load("config.toml")
     ser_conn_objs = config['files']['recon_objs']

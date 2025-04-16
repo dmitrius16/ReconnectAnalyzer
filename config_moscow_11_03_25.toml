@@ -1,5 +1,5 @@
 [files]
-input_file = '..\Moscow_11.03.2025\ENG_STAT.log'
+input_file = '..\Moscow_11.03.2025\TDIR_roaming.log'
 output_dir = '..\result_moscow_11_03_25'
 recon_dir  = '..\result_moscow_11_03_25'
 

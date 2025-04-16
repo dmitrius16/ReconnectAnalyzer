@@ -1,0 +1,55 @@
+[files]
+input_file = '..\Moscow_02.04.2025\tdir_stat.log'
+output_dir = '..\result_moscow_02_04_25'
+
+[[BaseStation]]
+name = "633.ICIO.201"
+RFPI = [
+    "03879ba238",
+    "03879ba200"
+]
+
+[[BaseStation]]
+name = "633.ICIO.202"
+RFPI = [
+    "03879ee758",
+    "03879ba018"
+]
+
+[[BaseStation]]
+name = "633.ICIO.203"
+RFPI = [
+    "03879ee750",
+    "03879022b8"
+]
+
+[[BaseStation]]
+name = "600.ICIO.203"
+RFPI = [
+    "03879ba508",
+    "03879ba228"
+]
+
+
+[options]
+Option_0 = 90
+Option_1 = 90
+Option_2 = 32
+Option_3 = 65
+Option_4 = 5
+Option_5 = 5
+Option_6 = 5
+Option_7 = 5
+Option_8 = 10
+Option_9 = 10
+Option_10 = 10
+Option_11 = 15
+Option_12 = 9
+Option_13 = 17
+Option_14 = 2
+Option_15 = 2
+Option_16 = 5
+Option_17 = 10
+Option_18 = 172
+Option_19 = 60
+
