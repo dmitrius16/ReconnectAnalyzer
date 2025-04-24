@@ -8,7 +8,8 @@ import toml
 import os
 from log_utils import *
 
-input_config_file = "night_beltpack.toml"
+input_config_file = "config_moscow_23_04_25.toml"
+#input_config_file = "config_moscow_03_04_25.toml"
 
 def filter_beltpack_log(log_file_name_path: str, out_file_name: str) -> None:
 

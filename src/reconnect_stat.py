@@ -133,8 +133,10 @@ class Reconnect_Stat():
                         cnt_trig_thr[key] += 1
                     else:
                         cnt_trig_thr[key] = 0
+            else:
+                break
 
-        # ищем ключ у которого максимальное значение ошибок, на случай если не удасться определить по срабатыванию порогов
+        # ищем ключ у которого максимальное значение ошибок, на случай если не по определить по срабатыванию порогов
         max_err_key_name = ""
         max_err_val = 0
         thr_keys = []
@@ -157,7 +159,7 @@ class Reconnect_Stat():
         if self.disconn_reason == Reconnect_Stat.DisconnReason_FindBSWith2Ch:
             find_text_in_log = "> F:BS search init by thr"
             cnt_thr = {Reconnect_Stat.Average_RSSI: 0, Reconnect_Stat.NumberOf_BeltpackNoSync: 0, Reconnect_Stat.NumberOf_ACRCError: 0,
-                       Reconnect_Stat.NumberOf_XCRCError: 0, Reconnect_Stat.NumberOf_ZError: 0, Reconnect_Stat.NumberOf_BeltpackNoSync: 0}
+                       Reconnect_Stat.NumberOf_XCRCError: 0, Reconnect_Stat.NumberOf_ZError: 0, Reconnect_Stat.NumberOf_BSNoSync: 0}
         elif self.disconn_reason == Reconnect_Stat.DisconnReason_ConnRejByBeltpack:
             cnt_thr = {Reconnect_Stat.NumberOf_BeltpackNoSync: 0, Reconnect_Stat.NumberOf_ACRCError: 0,
                        Reconnect_Stat.NumberOf_XCRCError: 0, Reconnect_Stat.NumberOf_BSNoSync: 0}

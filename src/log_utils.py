@@ -255,3 +255,4 @@ def find_sync_complete_tm_stmp_info(filter_log: List[str], i_sel_rfpi: int) -> i
     int
         Временная метка с завершением синхронизации
     """
+    pass

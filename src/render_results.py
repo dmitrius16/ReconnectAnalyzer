@@ -158,6 +158,29 @@ def create_reconnect_report(reconn_objs: List[Reconnect_Stat]) -> Dict:
     return result
 
 
+def get_fun_from_range(interval: str):
+    bounds  = interval.split("-")
+    if bounds[1] == "inf":
+        return lambda x : int(bounds[0]) <= x
+    else:
+        return lambda x: int(bounds[0]) <= x < int(bounds[1])
+
+
+def create_no_snd_pivot_table(reconn_objs: List[Reconnect_Stat], toml_cfg: Dict) -> Dict:
+    no_snd_stat_ranges = toml_cfg["No_sound_Stat"]
+    intervals = no_snd_stat_ranges["intervals"]
+    check_func = {}
+    for interval in intervals:
+        check_func[interval] = get_fun_from_range(interval)
+
+    res = dict.fromkeys(intervals, 0)
+    for recon_obj in reconn_objs:
+        for k in check_func:
+            no_snd_tm = recon_obj.end_tm - recon_obj.start_tm
+            if check_func[k](no_snd_tm):
+                res[k] += 1
+    return res
+
 def create_bs_search_report(reconn_obj: Reconnect_Stat) -> Dict:
     result = []
     for num, obj in enumerate(reconn_obj.bs_search_info):

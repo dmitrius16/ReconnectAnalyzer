@@ -1,7 +1,6 @@
 [files]
 input_file = '..\Moscow_03.04.2025\Round_trip_tdir.log'
 output_dir = '..\result_moscow_03_04_25'
-recon_dir  = '..\result_moscow_03_04_25'
 
 [[BaseStation]]
 name = "633.ICIO.201"
@@ -53,4 +52,14 @@ Option_16 = 5
 Option_17 = 10
 Option_18 = 172
 Option_19 = 60
+
+[No_sound_Stat]
+intervals = [
+    "0-400",
+    "400-800",
+    "800-1400",
+    "1400-2000",
+    "2000-2500",
+    "2500-inf"
+]
 

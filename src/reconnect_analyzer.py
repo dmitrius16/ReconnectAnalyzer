@@ -10,6 +10,7 @@ from reconnect_stat import find_reconnection
 from render_results import plot_graphs
 from render_results import create_reconnect_report
 from render_results import create_bs_search_report
+from render_results import create_no_snd_pivot_table
 
 from log_filter import input_config_file
 from log_utils import *
@@ -23,6 +24,8 @@ def process_logs() -> List[Reconnect_Stat]:
     filtered_log_file_name = filtered_dir + "\\" + get_filter_log_name(input_file)
     Reconnect_Stat.RoamingOptions = config['options']
     reconn_objs = find_reconnection(filtered_log_file_name)
+
+    # create_no_snd_pivot_table(reconn_objs, config)
     return reconn_objs
 
 
