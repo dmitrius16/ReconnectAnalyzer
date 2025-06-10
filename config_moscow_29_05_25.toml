@@ -1,6 +1,6 @@
 [files]
-input_file = '..\Moscow_02.04.2025\tdir.log'
-output_dir = '..\result_moscow_02_04_25'
+input_file = '..\Moscow_29.05.2025\eng_roaming.log'
+output_dir = '..\result_moscow_29_05_25'
 
 [[BaseStation]]
 name = "633.ICIO.201"
@@ -30,6 +30,13 @@ RFPI = [
     "03879ba228"
 ]
 
+[[BaseStation]]
+name = "Add_Base_4"
+RFPI = [
+    "03879ba358",
+    "03879b9fb0"
+]
+
 
 [options]
 Option_0 = 90
@@ -52,4 +59,15 @@ Option_16 = 5
 Option_17 = 10
 Option_18 = 172
 Option_19 = 60
+
+[No_sound_Stat]
+intervals = [
+    "0-400",
+    "400-800",
+    "800-1400",
+    "1400-2000",
+    "2000-2500",
+    "2500-3500",
+    "3500-inf"
+]
 

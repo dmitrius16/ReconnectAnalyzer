@@ -8,7 +8,7 @@ import toml
 import os
 from log_utils import *
 
-input_config_file = "config_moscow_23_04_25.toml"
+input_config_file = "config_moscow_29_05_25.toml"
 #input_config_file = "config_moscow_03_04_25.toml"
 
 def filter_beltpack_log(log_file_name_path: str, out_file_name: str) -> None:
@@ -26,6 +26,7 @@ def filter_beltpack_log(log_file_name_path: str, out_file_name: str) -> None:
             filter.append(entry.find(connection_establish_str) != -1)
             filter.append(entry.find(output_every_5_sec_str) != -1)
             filter.append(entry.find(s_cc_setup_str) != -1)
+            filter.append(entry.find(s_state) != -1)
             filter.append(entry.find("Option ") != -1)
 
             if any(filter): # tm: - timelabels, tm= - strings when try to find BS

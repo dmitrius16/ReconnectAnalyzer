@@ -189,7 +189,6 @@ class Reconnect_Stat():
     def get_bs_search_stat(self, filter_logs: List[str], tm_labels: Tuple[int, int]):
         log_ind = tm_labels[0]
         i_snd_est = tm_labels[1] if tm_labels[1] is not None else (len(filter_logs) - 1)
-
         res = []
         # Вынести в отдельнцю функцию
         if self.disconn_reason == Reconnect_Stat.DisconnReason_FindBSWith2Ch:
@@ -213,6 +212,17 @@ class Reconnect_Stat():
                     if sel_bs_info is not None:
                         res.append(create_bs_search_info(sel_bs_info))
                     break
+            if not res:  # был на самом деле параллельный поиск но во время его выключились по порогу
+                log_ind = tm_labels[0]
+                cntstring = 15
+                while log_ind > 0 and cntstring:
+                    log_ind -= 1
+                    cntstring -= 1
+                    if Reconnect_Stat.SelectedRFPI in filter_logs[log_ind]:
+                        sel_bs_info = get_rfpi_rssi_tm_from_selected_rfpi_str(filter_logs[log_ind])
+                        if sel_bs_info is not None:
+                            res.append(create_bs_search_info(sel_bs_info))
+                        break
 
         # ищем информацию о том когда закончился sync complete записываем временную метку
         log_ind += 1

@@ -11,6 +11,7 @@ connection_lost_str = "~~~~~~~~~~~~~   CONNECTION LOST"
 output_every_5_sec_str = "~~~~~~~~~~~ Output every 5 sec"
 selected_rfpi_str = "> F:FP selected: RFPI"
 s_cc_setup_str = "> S:-> {CC-SETUP}"
+s_state = "~~~~ State" # lose sound message
 
 bs_name_to_rfpi = {}
 rfpi_to_bs_name = {}

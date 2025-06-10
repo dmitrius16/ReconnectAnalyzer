@@ -16,21 +16,21 @@ from log_filter import input_config_file
 from log_utils import *
 
 
-def process_logs() -> List[Reconnect_Stat]:
-    config = toml.load(input_config_file)
-    input_file = config['files']['input_file']
-    filtered_dir = config['files']['output_dir']
-    parse_bs_config(config)
+def process_logs(toml_conf: Dict[str, Any]) -> List[Reconnect_Stat]:
+    # config = toml.load(input_config_file)
+    input_file = toml_conf['files']['input_file']
+    filtered_dir = toml_conf['files']['output_dir']
+    parse_bs_config(toml_conf)
     filtered_log_file_name = filtered_dir + "\\" + get_filter_log_name(input_file)
-    Reconnect_Stat.RoamingOptions = config['options']
+    Reconnect_Stat.RoamingOptions = toml_conf['options']
     reconn_objs = find_reconnection(filtered_log_file_name)
 
-    # create_no_snd_pivot_table(reconn_objs, config)
     return reconn_objs
 
 
 if __name__ == "__main__":
-    reconn_objs = process_logs()
+    config = toml.load(input_config_file)
+    reconn_objs = process_logs(config)
     '''
     out_objs = config['files']['recon_objs']
     with open(out_objs, 'wb') as obj_dump_file:
@@ -38,6 +38,10 @@ if __name__ == "__main__":
     '''
     report_obj = create_reconnect_report(reconn_objs)
     df = pd.DataFrame(report_obj)
+    print(df)
+
+    no_snd_time_durations = create_no_snd_pivot_table(reconn_objs, config)
+    df = pd.DataFrame([no_snd_time_durations,])
     print(df)
 
     for num, recon_obj in enumerate(reconn_objs, start=1):

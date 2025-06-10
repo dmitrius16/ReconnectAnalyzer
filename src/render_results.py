@@ -179,6 +179,7 @@ def create_no_snd_pivot_table(reconn_objs: List[Reconnect_Stat], toml_cfg: Dict)
             no_snd_tm = recon_obj.end_tm - recon_obj.start_tm
             if check_func[k](no_snd_tm):
                 res[k] += 1
+    res["Total"] = len(reconn_objs)
     return res
 
 def create_bs_search_report(reconn_obj: Reconnect_Stat) -> Dict:
@@ -195,6 +196,8 @@ def create_bs_search_report(reconn_obj: Reconnect_Stat) -> Dict:
         result.append(bs_search_dict)
     return result
 
+def create_no_snd_report():
+    pass
 
 def main():
     config = toml.load("config.toml")
