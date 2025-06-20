@@ -190,6 +190,8 @@ class Reconnect_Stat():
         log_ind = tm_labels[0]
         i_snd_est = tm_labels[1] if tm_labels[1] is not None else (len(filter_logs) - 1)
         res = []
+        if tm_labels[0] == 3884:
+            pass
         # Вынести в отдельнцю функцию
         if self.disconn_reason == Reconnect_Stat.DisconnReason_FindBSWith2Ch:
             # ищем строчку selected RFPI до потери коннекта

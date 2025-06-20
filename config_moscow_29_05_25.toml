@@ -1,5 +1,5 @@
 [files]
-input_file = '..\Moscow_29.05.2025\eng_roaming.log'
+input_file = '..\Moscow_29.05.2025\rez_63b_Petr.log'
 output_dir = '..\result_moscow_29_05_25'
 
 [[BaseStation]]
